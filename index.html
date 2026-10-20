@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STX Framework Rev. 10 — Trigger Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js">\</script>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--line:#30363d;--text:#e6edf3;--muted:#8b949e;
+        --ok:#3fb950;--warn:#d29922;--bad:#f85149;--info:#58a6ff;--accent:#2ea043}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+  header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 22px;
+         background:linear-gradient(90deg,#0f2a1d,#161b22);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  h1{font-size:18px;margin:0} h1 small{color:var(--muted);font-weight:400;margin-left:6px}
+  h2{font-size:15px;margin:0 0 10px} h3{font-size:13px;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  button,.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;font:inherit}
+  button:hover,.btn:hover{border-color:var(--info)} button.active{background:#1f6feb;border-color:#1f6feb}
+  .status{font-size:12px;color:var(--muted)} .status.ok{color:var(--ok)} .status.err{color:var(--bad)}
+  nav{display:flex;gap:4px;padding:0 22px;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto}
+  .tab{background:none;border:none;border-bottom:2px solid transparent;border-radius:0;padding:10px 14px;color:var(--muted)}
+  .tab.active{color:var(--text);border-bottom-color:#f0883e;background:none}
+  main{padding:18px 22px;max-width:1500px;margin:auto}
+  .panel{display:none} .panel.active{display:block}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .card .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .card .v{font-size:22px;font-weight:600;margin:2px 0} .card .s{font-size:12px;color:var(--muted)}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;overflow-x:auto}
+  .grid2{display:grid;grid-template-columns:2.2fr 1fr;gap:14px} .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:1000px){.grid2,.grid3{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px;position:sticky;top:0}
+  tr:hover td{background:rgba(255,255,255,.02)} tr.cur td{background:rgba(31,111,235,.18);font-weight:600}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid}
+  .badge.ok{color:var(--ok);border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.1)}
+  .badge.warn{color:var(--warn);border-color:rgba(210,153,34,.4);background:rgba(210,153,34,.1)}
+  .badge.bad{color:#fff;border-color:var(--bad);background:var(--bad)}
+  .badge.info{color:var(--info);border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.1)}
+  .badge.muted{color:var(--muted);border-color:var(--line)}
+  .sys{white-space:nowrap;font-weight:600} .s-S1{color:#3fb950} .s-S2{color:#f0883e} .s-S4{color:#d2a8ff} .s-RE{color:#58a6ff}
+  .up{color:var(--ok)} .down{color:var(--bad)} .muted{color:var(--muted)}
+  .alert{border-radius:8px;padding:10px 12px;margin-bottom:8px;border:1px solid}
+  .alert.ok{border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.08)}
+  .alert.bad{border-color:var(--bad);background:rgba(248,81,73,.12)}
+  .alert.warn{border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.08)}
+  .alert.info{border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.08)}
+  .chart{position:relative;height:300px} .chart.tall{height:440px}
+  label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  input[type=number],input[type=text],input[type=date],input[type=password]{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+  .form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px}
+  .kv td:first-child{color:var(--muted);width:55%}
+  .matrix td,.matrix th{text-align:center} .matrix td.hit{background:#1f6feb;color:#fff;font-weight:700}
+  .check{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .row{padding:6px 0}
+  .note{font-size:12px;color:var(--muted)}
+  .disclaimer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:20px;padding-top:10px}
+  .legend-hint{font-size:12px;color:var(--muted);margin:-4px 0 8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>STX Position Framework <small>Rev. 10 · trigger dashboard</small></h1>
+  <div class="toolbar">
+    <span class="status" id="status">Starting…</span>
+    <button id="btnReload" title="Reload data/stx.json from the repo">↻ Reload repo data</button>
+    <button id="btnLive" title="Fetch directly in the browser (needs free Twelve Data key)">⚡ Live fetch</button>
+    <label class="btn">⬆ CSV<input type="file" id="csv" accept=".csv" hidden></label>
+  </div>
+</header>
+<nav>
+  <button class="tab active" data-panel="p-dash">Dashboard</button>
+  <button class="tab" data-panel="p-charts">Charts</button>
+  <button class="tab" data-panel="p-s0">System 0 · Concentration</button>
+  <button class="tab" data-panel="p-s3">System 3 · Earnings</button>
+  <button class="tab" data-panel="p-s4">System 4 · Full Exit</button>
+  <button class="tab" data-panel="p-log">Signal log</button>
+  <button class="tab" data-panel="p-set">Settings</button>
+</nav>
+<main>
+  <!-- DASHBOARD -->
+  <section class="panel active" id="p-dash">
+    <div class="cards" id="cards"></div>
+    <div id="banner"></div>
+    <div class="grid2">
+      <div class="box"><h2>Trigger status — latest close</h2><table id="trig"></table></div>
+      <div class="box"><h2>Price levels to watch</h2><table id="levels"></table>
+        <p class="note">Decisions are made on the close and executed next session: marketable limit at prior close − 3%, MOC if unfilled by 10:30 ET. No resting stop orders.</p></div>
+    </div>
+    <p class="note">Data: <span id="src">—</span></p>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="panel" id="p-charts">
+    <div class="toolbar" style="margin-bottom:12px">
+      <button data-range="3M">3M</button><button data-range="6M">6M</button><button data-range="1Y">1Y</button>
+      <button data-range="2Y">2Y</button><button data-range="5Y">5Y</button><button data-range="START">Since start</button><button data-range="ALL">All</button>
+      <label class="note"><input type="checkbox" id="logScale"> log price scale</label>
+    </div>
+    <div class="box"><h2>Price, SMAs, Magnitude tiers, ladder rung & signals</h2>
+      <p class="legend-hint">▼ red = System 2 sell · ▼ green = System 1 ladder sell · ▲ blue = re-entry · ★ = mandatory System 4 review · ● = info (dormant/re-base/episode closed). Hover a marker for details; click legend items to toggle.</p>
+      <div class="chart tall"><canvas id="cPrice"></canvas></div></div>
+    <div class="grid2">
+      <div class="box"><h2>RSI(14)</h2><div class="chart"><canvas id="cRsi"></canvas></div></div>
+      <div class="box"><h2>Held % of S0 (per rules)</h2><div class="chart"><canvas id="cHeld"></canvas></div></div>
+    </div>
+    <div class="grid2">
+      <div class="box"><h2>Drawdown from P2</h2><div class="chart"><canvas id="cDd"></canvas></div></div>
+      <div class="box"><h2>Volume vs prior-50 average</h2><div class="chart"><canvas id="cVol"></canvas></div></div>
+    </div>
+    <div class="box"><h2>Weekly MACD (12/26/9) — Momentum family</h2><p class="legend-hint">* = week not yet closed (not confirmed).</p><div class="chart"><canvas id="cMacd"></canvas></div></div>
+  </section>
+
+  <!-- SYSTEM 0 -->
+  <section class="panel" id="p-s0">
+    <div class="box"><h2>System 0 — Concentration Policy</h2>
+      <div class="form">
+        <label class="f">Shares held now<input type="number" data-cfg="sharesHeld"></label>
+        <label class="f">Unvested RSU/PSU shares<input type="number" data-cfg="unvested"></label>
+        <label class="f">Investable net worth (USD)<input type="number" data-cfg="netWorth"></label>
+        <label class="f">Target % of net worth<input type="number" step="0.5" data-cfg="targetPct"></label>
+        <label class="f">Glide quarters remaining<input type="number" data-cfg="quartersLeft"></label>
+        <label class="f">Shares sold by S1–3 this quarter<input type="number" data-cfg="soldThisQtr"></label>
+      </div>
+      <div id="s0out"></div>
+    </div>
+  </section>
+
+  <!-- SYSTEM 3 -->
+  <section class="panel" id="p-s3">
+    <div class="box"><h2>System 3 — Earnings Discipline</h2>
+      <div class="form">
+        <label class="f">Revenue reported<input type="number" step="any" data-cfg="revAct"></label>
+        <label class="f">Revenue consensus<input type="number" step="any" data-cfg="revCons"></label>
+        <label class="f">Non-GAAP EPS reported<input type="number" step="any" data-cfg="epsAct"></label>
+        <label class="f">Non-GAAP EPS consensus<input type="number" step="any" data-cfg="epsCons"></label>
+        <label class="f">Next-qtr revenue guidance midpoint<input type="number" step="any" data-cfg="guideMid"></label>
+        <label class="f">Next-qtr revenue consensus<input type="number" step="any" data-cfg="guideCons"></label>
+      </div>
+      <div id="s3out"></div>
+      <p class="note">Beat = revenue and EPS both above consensus · Miss = either more than 2% below · Guidance raised/cut = midpoint more than ±2% vs consensus. Use the pre-report consensus mean.</p>
+    </div>
+  </section>
+
+  <!-- SYSTEM 4 -->
+  <section class="panel" id="p-s4">
+    <div class="box"><h2>System 4 — Full Exit Protocol <span class="badge warn">public information only</span></h2>
+      <div id="s4out" style="margin-bottom:10px"></div>
+      <div class="grid3">
+        <div><h3>Category 1 — Thesis invalidation</h3>
+          <label class="f">SSD-to-HDD cost gap ($/TB, ×)<input type="number" step="0.1" data-cfg="ssdGap"></label>
+          <label class="check"><input type="checkbox" data-s4="c1_hyper">Loss of a top-3 hyperscaler relationship (public)</label>
+          <label class="check"><input type="checkbox" data-s4="c1_hamr">HAMR unscalable / mass reliability failure</label>
+          <label class="check"><input type="checkbox" data-s4="c1_tech">New storage technology in commercial deployment</label>
+          <label class="check"><input type="checkbox" data-s4="c1_comp">Competitor eliminates HAMR capacity/cost lead</label>
+        </div>
+        <div><h3>Category 2 — Company distress</h3>
+          <label class="check"><input type="checkbox" data-s4="c2_ceo">CEO/CFO adverse departure</label>
+          <label class="check"><input type="checkbox" data-s4="c2_sec">SEC investigation / material restatement</label>
+          <label class="check"><input type="checkbox" data-s4="c2_debt">Covenant breach / sub-investment-grade downgrade</label>
+          <label class="check"><input type="checkbox" data-s4="c2_recall">Mass recall / systematic failure rate</label>
+        </div>
+        <div><h3>Category 3 — Fundamental deterioration (this report)</h3>
+          <label class="check"><input type="checkbox" data-c3="rev">Revenue: 2 consecutive qtrs YoY decline</label>
+          <label class="check"><input type="checkbox" data-c3="gm">Gross margin: > 8 pts below peak, 2 qtrs</label>
+          <label class="check"><input type="checkbox" data-c3="share">Nearline share < 40%, 2 qtrs</label>
+          <label class="check"><input type="checkbox" data-c3="capex">Hyperscaler capex declining, 2 qtrs</label>
+          <label class="check"><input type="checkbox" data-cfg="cat3Prev"><b>Previous report was also in breach</b></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="panel" id="p-log">
+    <div class="box"><h2>Signal log — Systems 1, 2, re-entry & mandatory review (simulated from start date)</h2>
+      <p class="note" id="logsum"></p><table id="log"></table></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="panel" id="p-set">
+    <div class="box"><h2>Framework settings</h2>
+      <div class="form">
+        <label class="f">Framework start date<input type="date" data-cfg="startDate"></label>
+        <label class="f">S0 shares (for share counts)<input type="number" data-cfg="s0"></label>
+        <label class="f">A1 override (blank = auto 252-day high)<input type="number" step="any" data-cfg="a1Override"></label>
+        <label class="f">Forward (NTM) EPS consensus<input type="number" step="any" data-cfg="fwdEps"></label>
+        <label class="f">Accelerator P/E (compress)<input type="number" data-cfg="peCompress"></label>
+        <label class="f">Valuation sell P/E<input type="number" data-cfg="peSell"></label>
+        <label class="f">Next earnings date<input type="date" data-cfg="earningsDate"></label>
+        <label class="f">Data file path<input type="text" data-cfg="dataUrl"></label>
+        <label class="f">Twelve Data API key (optional, live fetch)<input type="password" data-cfg="twelveKey"></label>
+      </div>
+      <label class="check"><input type="checkbox" data-cfg="fundamentalsOk">Re-entry fundamental check OK (no hyperscaler capex / HAMR deterioration in 90 days; open window; no S3 lockout / S4 trigger)</label>
+      <p><button id="btnReset">Reset all settings</button></p>
+      <p class="note">Settings and personal numbers are stored only in this browser (localStorage). The simulation applies Systems 1 and 2 plus re-entry exactly as written from the start date, assuming every signal was acted on. Forward EPS is a single value applied across the simulated period — refresh it after every earnings release.</p>
+    </div>
+  </section>
+
+  <p class="disclaimer">For analysis and discussion only — not financial, tax or legal advice. Uses public market data only; no trigger may rely on information known through employment. Confirm trading windows, pre-clearance and 10b5-1 arrangements with Seagate Legal / Compliance before acting.</p>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
