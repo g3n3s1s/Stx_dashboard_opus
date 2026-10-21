@@ -2,113 +2,1057 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>STX Framework Rev. 10 — Trigger Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<style>
-  :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--line:#30363d;--text:#e6edf3;--muted:#8b949e;
-        --ok:#3fb950;--warn:#d29922;--bad:#f85149;--info:#58a6ff;--accent:#2ea043}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
-  header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 22px;
-         background:linear-gradient(90deg,#0f2a1d,#161b22);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-  h1{font-size:18px;margin:0} h1 small{color:var(--muted);font-weight:400;margin-left:6px}
-  h2{font-size:15px;margin:0 0 10px} h3{font-size:13px;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  button,.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;font:inherit}
-  button:hover,.btn:hover{border-color:var(--info)} button.active{background:#1f6feb;border-color:#1f6feb}
-  button.primary{background:#238636;border-color:#2ea043} button.mini{padding:2px 8px;font-size:12px}
-  .status{font-size:12px;color:var(--muted)} .status.ok{color:var(--ok)} .status.err{color:var(--bad)}
-  nav{display:flex;gap:4px;padding:0 22px;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto}
-  .tab{background:none;border:none;border-bottom:2px solid transparent;border-radius:0;padding:10px 14px;color:var(--muted);white-space:nowrap}
-  .tab.active{color:var(--text);border-bottom-color:#f0883e;background:none}
-  main{padding:18px 22px;max-width:1500px;margin:auto}
-  .panel{display:none} .panel.active{display:block}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:14px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-  .card .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-  .card .v{font-size:22px;font-weight:600;margin:2px 0} .card .s{font-size:12px;color:var(--muted)}
-  .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;overflow-x:auto}
-  .grid2{display:grid;grid-template-columns:2.2fr 1fr;gap:14px} .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  @media(max-width:1000px){.grid2,.grid3{grid-template-columns:1fr}}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px;position:sticky;top:0}
-  tr:hover td{background:rgba(255,255,255,.02)} tr.cur td{background:rgba(31,111,235,.18);font-weight:600} tr.dim td{opacity:.5}
-  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid}
-  .badge.ok{color:var(--ok);border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.1)}
-  .badge.warn{color:var(--warn);border-color:rgba(210,153,34,.4);background:rgba(210,153,34,.1)}
-  .badge.bad{color:#fff;border-color:var(--bad);background:var(--bad)}
-  .badge.info{color:var(--info);border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.1)}
-  .badge.muted{color:var(--muted);border-color:var(--line)}
-  .pill{display:inline-block;margin:0 6px 6px 0;padding:4px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12px}
-  .pill.ok{color:var(--ok)} .pill.warn{color:var(--warn)} .pill.bad{color:var(--bad)} .pill.info{color:var(--info)} .pill.muted{color:var(--muted)}
-  .sys{white-space:nowrap;font-weight:600} .s-S1{color:#3fb950} .s-S2{color:#f0883e} .s-S3{color:#e3b341} .s-S4{color:#d2a8ff} .s-RE{color:#58a6ff} .s-S0{color:#79c0ff} .s-Other{color:var(--muted)}
-  .up{color:var(--ok)} .down{color:var(--bad)} .muted{color:var(--muted)}
-  .alert{border-radius:8px;padding:10px 12px;margin-bottom:8px;border:1px solid}
-  .alert.ok{border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.08)}
-  .alert.bad{border-color:var(--bad);background:rgba(248,81,73,.12)}
-  .alert.warn{border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.08)}
-  .alert.info{border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.08)}
-  .chart{position:relative;height:300px} .chart.tall{height:440px}
-  label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
-  input[type=number],input[type=text],input[type=date],input[type=password],select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
-  .form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px}
-  .kv td:first-child{color:var(--muted);width:55%}
-  .matrix td,.matrix th{text-align:center} .matrix td.hit{background:#1f6feb;color:#fff;font-weight:700}
-  .check{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px dashed var(--line)}
-  .row{padding:6px 0}
-  .note{font-size:12px;color:var(--muted)}
-  .disclaimer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:20px;padding-top:10px}
-  .legend-hint{font-size:12px;color:var(--muted);margin:-4px 0 8px}
-  .modebar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:10px 14px;margin-bottom:14px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-  /* ---- visual signal board ---- */
-  .verdict{display:flex;gap:14px;align-items:center;border-radius:12px;padding:14px 18px;margin-bottom:14px;border:1px solid}
-  .verdict .v-ico{font-size:30px;line-height:1}
-  .verdict .v-head{font-size:17px;font-weight:700}
-  .verdict .v-body{font-size:13px;color:var(--muted);margin-top:2px}
-  .v-red{background:rgba(248,81,73,.12);border-color:var(--bad)}
-  .v-amber{background:rgba(210,153,34,.10);border-color:rgba(210,153,34,.6)}
-  .v-green{background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.5)}
-  .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-bottom:16px}
-  .tile{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;cursor:default;transition:transform .12s}
-  .tile:hover{transform:translateY(-2px)}
-  .t-red{border-left-color:var(--bad);background:linear-gradient(135deg,rgba(248,81,73,.14),var(--panel) 60%)}
-  .t-amber{border-left-color:var(--warn);background:linear-gradient(135deg,rgba(210,153,34,.12),var(--panel) 60%)}
-  .t-green{border-left-color:var(--ok)}
-  .t-blue{border-left-color:var(--info);background:linear-gradient(135deg,rgba(88,166,255,.10),var(--panel) 60%)}
-  .t-grey{border-left-color:#484f58;opacity:.85}
-  .t-head{display:flex;align-items:center;gap:8px}
-  .t-ico{font-size:20px}
-  .t-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;flex:1}
-  .t-state{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
-  .t-state.red{background:var(--bad);color:#fff}.t-state.amber{background:rgba(210,153,34,.2);color:var(--warn)}
-  .t-state.green{background:rgba(63,185,80,.15);color:var(--ok)}.t-state.blue{background:rgba(88,166,255,.15);color:var(--info)}
-  .t-state.grey{background:#30363d;color:var(--muted)}
-  .t-big{font-size:24px;font-weight:700}.t-big small{font-size:12px;font-weight:400;color:var(--muted)}
-  .t-sub{font-size:12px;color:var(--muted)}
-  .vbar{position:relative;height:8px;background:#21262d;border-radius:99px;margin:4px 0 10px}
-  .vfill{height:100%;border-radius:99px}
-  .vfill.red{background:var(--bad)}.vfill.amber{background:var(--warn)}.vfill.green{background:var(--ok)}.vfill.blue{background:var(--info)}.vfill.grey{background:#484f58}
-  .vmark{position:absolute;top:-3px;width:2px;height:14px;background:#e6edf3;opacity:.6}
-  .vmark i{position:absolute;top:14px;left:-10px;width:22px;text-align:center;font-size:9px;font-style:normal;color:var(--muted)}
-  .pips{display:flex;gap:5px}
-  .pip{flex:1;height:10px;border-radius:3px;background:#21262d}
-  .pip.on.red{background:var(--bad)}.pip.on.amber{background:var(--warn)}.pip.on.green{background:var(--ok)}.pip.on.blue{background:var(--info)}
-  details.more summary{cursor:pointer;color:var(--info);font-size:13px;margin-bottom:8px}
+<title>STX Framework Rev. 10 - Trigger Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js">\</script>
+
+<style>
+:root {
+  --bg:#0d1117;
+  --panel:#161b22;
+  --panel2:#1c2330;
+  --line:#30363d;
+  --text:#e6edf3;
+  --muted:#8b949e;
+  --ok:#3fb950;
+  --warn:#d29922;
+  --bad:#f85149;
+  --info:#58a6ff;
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:14px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif;
+}
+
+header {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 22px;
+  background:linear-gradient(90deg,#0f2a1d,#161b22);
+  border-bottom:1px solid var(--line);
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+
+h1 {
+  font-size:18px;
+  margin:0;
+}
+
+h1 small {
+  color:var(--muted);
+  font-weight:400;
+  margin-left:6px;
+}
+
+h2 {
+  font-size:15px;
+  margin:0 0 10px;
+}
+
+h3 {
+  font-size:13px;
+  margin:14px 0 6px;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+.toolbar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+
+button,
+.btn {
+  background:var(--panel2);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:6px 12px;
+  cursor:pointer;
+  font:inherit;
+}
+
+button:hover,
+.btn:hover {
+  border-color:var(--info);
+}
+
+button.active {
+  background:#1f6feb;
+  border-color:#1f6feb;
+}
+
+button.primary {
+  background:#238636;
+  border-color:#2ea043;
+}
+
+button.mini {
+  padding:2px 8px;
+  font-size:12px;
+}
+
+.status {
+  font-size:12px;
+  color:var(--muted);
+}
+
+.status.ok {
+  color:var(--ok);
+}
+
+.status.err {
+  color:var(--bad);
+}
+
+nav {
+  display:flex;
+  gap:4px;
+  padding:0 22px;
+  background:var(--panel);
+  border-bottom:1px solid var(--line);
+  overflow-x:auto;
+}
+
+.tab {
+  background:none;
+  border:none;
+  border-bottom:2px solid transparent;
+  border-radius:0;
+  padding:10px 14px;
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.tab.active {
+  color:var(--text);
+  border-bottom-color:#f0883e;
+  background:none;
+}
+
+main {
+  padding:18px 22px;
+  max-width:1500px;
+  margin:auto;
+}
+
+.panel {
+  display:none;
+}
+
+.panel.active {
+  display:block;
+}
+
+.cards {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.card,
+.box {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+
+.card {
+  padding:10px 12px;
+}
+
+.card .k {
+  font-size:11px;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+.card .v {
+  font-size:22px;
+  font-weight:600;
+  margin:2px 0;
+}
+
+.card .s {
+  font-size:12px;
+  color:var(--muted);
+}
+
+.box {
+  padding:14px;
+  margin-bottom:14px;
+  overflow-x:auto;
+}
+
+.grid2 {
+  display:grid;
+  grid-template-columns:2.2fr 1fr;
+  gap:14px;
+}
+
+.grid3 {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+@media(max-width:1000px) {
+  .grid2,
+  .grid3 {
+    grid-template-columns:1fr;
+  }
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+th,
+td {
+  padding:7px 8px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  vertical-align:top;
+}
+
+th {
+  background:var(--panel2);
+  color:var(--muted);
+  font-size:12px;
+  position:sticky;
+  top:0;
+}
+
+tr:hover td {
+  background:rgba(255,255,255,.02);
+}
+
+tr.cur td {
+  background:rgba(31,111,235,.18);
+  font-weight:600;
+}
+
+tr.dim td {
+  opacity:.5;
+}
+
+.badge {
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+  border:1px solid;
+}
+
+.badge.ok {
+  color:var(--ok);
+  border-color:rgba(63,185,80,.4);
+  background:rgba(63,185,80,.1);
+}
+
+.badge.warn {
+  color:var(--warn);
+  border-color:rgba(210,153,34,.4);
+  background:rgba(210,153,34,.1);
+}
+
+.badge.bad {
+  color:#fff;
+  border-color:var(--bad);
+  background:var(--bad);
+}
+
+.badge.info {
+  color:var(--info);
+  border-color:rgba(88,166,255,.4);
+  background:rgba(88,166,255,.1);
+}
+
+.badge.muted {
+  color:var(--muted);
+  border-color:var(--line);
+}
+
+.pill {
+  display:inline-block;
+  margin:0 6px 6px 0;
+  padding:4px 10px;
+  border-radius:999px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  font-size:12px;
+}
+
+.pill.ok {
+  color:var(--ok);
+}
+
+.pill.warn {
+  color:var(--warn);
+}
+
+.pill.bad {
+  color:var(--bad);
+}
+
+.pill.info {
+  color:var(--info);
+}
+
+.pill.muted {
+  color:var(--muted);
+}
+
+.sys {
+  white-space:nowrap;
+  font-weight:600;
+}
+
+.s-S1 {
+  color:#3fb950;
+}
+
+.s-S2 {
+  color:#f0883e;
+}
+
+.s-S3 {
+  color:#e3b341;
+}
+
+.s-S4 {
+  color:#d2a8ff;
+}
+
+.s-RE {
+  color:#58a6ff;
+}
+
+.s-S0 {
+  color:#79c0ff;
+}
+
+.s-Other {
+  color:var(--muted);
+}
+
+.up {
+  color:var(--ok);
+}
+
+.down {
+  color:var(--bad);
+}
+
+.muted {
+  color:var(--muted);
+}
+
+.alert {
+  border-radius:8px;
+  padding:10px 12px;
+  margin-bottom:8px;
+  border:1px solid;
+}
+
+.alert.ok {
+  border-color:rgba(63,185,80,.4);
+  background:rgba(63,185,80,.08);
+}
+
+.alert.bad {
+  border-color:var(--bad);
+  background:rgba(248,81,73,.12);
+}
+
+.alert.warn {
+  border-color:rgba(210,153,34,.5);
+  background:rgba(210,153,34,.08);
+}
+
+.alert.info {
+  border-color:rgba(88,166,255,.4);
+  background:rgba(88,166,255,.08);
+}
+
+.chart {
+  position:relative;
+  height:300px;
+}
+
+.chart.tall {
+  height:440px;
+}
+
+label.f {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:12px;
+  color:var(--muted);
+}
+
+input[type=number],
+input[type=text],
+input[type=date],
+input[type=password],
+select {
+  background:var(--bg);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:6px 8px;
+  font:inherit;
+}
+
+.form {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.kv td:first-child {
+  color:var(--muted);
+  width:55%;
+}
+
+.matrix td,
+.matrix th {
+  text-align:center;
+}
+
+.matrix td.hit {
+  background:#1f6feb;
+  color:#fff;
+  font-weight:700;
+}
+
+.check {
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:5px 0;
+  border-bottom:1px dashed var(--line);
+}
+
+.row {
+  padding:6px 0;
+}
+
+.note,
+.legend-hint {
+  font-size:12px;
+  color:var(--muted);
+}
+
+.legend-hint {
+  margin:-4px 0 8px;
+}
+
+.disclaimer {
+  font-size:12px;
+  color:var(--muted);
+  border-top:1px solid var(--line);
+  margin-top:20px;
+  padding-top:10px;
+}
+
+.modebar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  padding:10px 14px;
+  margin-bottom:14px;
+  border-radius:10px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+}
+
+/* Visual signal board */
+
+.verdict {
+  display:flex;
+  gap:14px;
+  align-items:center;
+  border-radius:12px;
+  padding:14px 18px;
+  margin-bottom:14px;
+  border:1px solid;
+}
+
+.verdict .v-ico {
+  font-size:30px;
+}
+
+.verdict .v-head {
+  font-size:17px;
+  font-weight:700;
+}
+
+.verdict .v-body {
+  font-size:13px;
+  color:var(--muted);
+}
+
+.v-red {
+  background:rgba(248,81,73,.12);
+  border-color:var(--bad);
+}
+
+.v-amber {
+  background:rgba(210,153,34,.1);
+  border-color:var(--warn);
+}
+
+.v-green {
+  background:rgba(63,185,80,.08);
+  border-color:var(--ok);
+}
+
+.board {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.tile {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-left:5px solid var(--line);
+  border-radius:12px;
+  padding:12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.t-red {
+  border-left-color:var(--bad);
+}
+
+.t-amber {
+  border-left-color:var(--warn);
+}
+
+.t-green {
+  border-left-color:var(--ok);
+}
+
+.t-blue {
+  border-left-color:var(--info);
+}
+
+.t-grey {
+  border-left-color:#484f58;
+  opacity:.85;
+}
+
+.t-head {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.t-title {
+  font-size:12px;
+  font-weight:600;
+  color:var(--muted);
+  text-transform:uppercase;
+  flex:1;
+}
+
+.t-state {
+  font-size:10px;
+  font-weight:700;
+  padding:2px 8px;
+  border-radius:999px;
+}
+
+.t-state.red {
+  background:var(--bad);
+}
+
+.t-state.amber {
+  color:var(--warn);
+}
+
+.t-state.green {
+  color:var(--ok);
+}
+
+.t-state.blue {
+  color:var(--info);
+}
+
+.t-state.grey {
+  color:var(--muted);
+}
+
+.t-big {
+  font-size:24px;
+  font-weight:700;
+}
+
+.t-big small,
+.t-sub {
+  font-size:12px;
+  color:var(--muted);
+}
+
+.vbar {
+  position:relative;
+  height:8px;
+  background:#21262d;
+  border-radius:99px;
+  margin:4px 0 10px;
+}
+
+.vfill {
+  height:100%;
+  border-radius:99px;
+}
+
+.vfill.red {
+  background:var(--bad);
+}
+
+.vfill.amber {
+  background:var(--warn);
+}
+
+.vfill.green {
+  background:var(--ok);
+}
+
+.vfill.blue {
+  background:var(--info);
+}
+
+.vmark {
+  position:absolute;
+  top:-3px;
+  width:2px;
+  height:14px;
+  background:#e6edf3;
+}
+
+.vmark i {
+  position:absolute;
+  top:14px;
+  left:-10px;
+  width:22px;
+  text-align:center;
+  font-size:9px;
+  font-style:normal;
+  color:var(--muted);
+}
+
+.pips {
+  display:flex;
+  gap:5px;
+}
+
+.pip {
+  flex:1;
+  height:10px;
+  border-radius:3px;
+  background:#21262d;
+}
+
+.pip.on.red {
+  background:var(--bad);
+}
+
+.pip.on.amber {
+  background:var(--warn);
+}
+
+.pip.on.green {
+  background:var(--ok);
+}
+
+.pip.on.blue {
+  background:var(--info);
+}
+
+/* Signal build-up panel */
+
+.buildup {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:16px;
+  overflow-x:auto;
+}
+
+.buildup h2 {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+}
+
+.bu-legend {
+  font-size:11px;
+  font-weight:400;
+  color:var(--muted);
+  display:flex;
+  align-items:center;
+  gap:4px;
+  flex-wrap:wrap;
+}
+
+.bu-row {
+  display:grid;
+  grid-template-columns:230px 1fr 150px;
+  gap:14px;
+  align-items:center;
+  padding:10px 8px;
+  border-top:1px solid var(--line);
+  border-left:4px solid transparent;
+}
+
+.bu-red {
+  border-left-color:var(--bad);
+  background:rgba(248,81,73,.06);
+}
+
+.bu-amber {
+  border-left-color:var(--warn);
+}
+
+.bu-green {
+  border-left-color:var(--ok);
+}
+
+.bu-blue {
+  border-left-color:var(--info);
+}
+
+.bu-grey {
+  border-left-color:#484f58;
+  opacity:.75;
+}
+
+@media(max-width:900px) {
+  .bu-row {
+    grid-template-columns:1fr;
+  }
+}
+
+.bu-name {
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.bu-ico {
+  font-size:20px;
+}
+
+.bu-rule {
+  font-size:11px;
+  color:var(--muted);
+}
+
+.bu-steps {
+  display:flex;
+  gap:6px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+}
+
+.bu-step {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  min-width:44px;
+}
+
+.bu-step.mini {
+  min-width:auto;
+  display:inline-flex;
+}
+
+.bu-step.mini .bu-box {
+  width:16px;
+  height:16px;
+  font-size:10px;
+}
+
+.bu-top,
+.bu-bot {
+  font-size:10px;
+  color:var(--muted);
+  white-space:nowrap;
+  min-height:13px;
+}
+
+.bu-box {
+  width:36px;
+  height:28px;
+  border-radius:6px;
+  background:#21262d;
+  border:1px solid #30363d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#fff;
+}
+
+.bu-step.on.red .bu-box {
+  background:var(--bad);
+  border-color:var(--bad);
+}
+
+.bu-step.on.amber .bu-box {
+  background:var(--warn);
+  border-color:var(--warn);
+}
+
+.bu-step.on.green .bu-box {
+  background:var(--ok);
+  border-color:var(--ok);
+}
+
+.bu-step.on.blue .bu-box {
+  background:var(--info);
+  border-color:var(--info);
+}
+
+.bu-step.part .bu-box {
+  background:repeating-linear-gradient(
+    45deg,
+    rgba(248,81,73,.55) 0 4px,
+    #21262d 4px 8px
+  );
+  border-color:rgba(248,81,73,.6);
+}
+
+.bu-step.used .bu-box {
+  background:#30363d;
+  color:var(--muted);
+  border-style:dashed;
+}
+
+.bu-step.today .bu-box {
+  outline:2px solid #e6edf3;
+  outline-offset:2px;
+}
+
+.bu-sep {
+  width:1px;
+  height:36px;
+  background:var(--line);
+  margin:0 4px;
+}
+
+.bu-gates {
+  margin-top:6px;
+}
+
+.bu-gate {
+  font-size:11px;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  margin-right:6px;
+}
+
+.bu-gate.ok {
+  color:var(--ok);
+  border-color:rgba(63,185,80,.4);
+}
+
+.bu-gate.no {
+  color:var(--warn);
+  border-color:rgba(210,153,34,.5);
+}
+
+.bu-status {
+  text-align:right;
+}
+
+.bu-count {
+  font-size:20px;
+  font-weight:700;
+}
+
+.bu-badge {
+  display:inline-block;
+  font-size:11px;
+  font-weight:700;
+  padding:2px 8px;
+  border-radius:999px;
+  background:#30363d;
+  color:var(--muted);
+}
+
+.bu-badge.red {
+  background:var(--bad);
+  color:#fff;
+}
+
+.bu-badge.amber {
+  background:rgba(210,153,34,.2);
+  color:var(--warn);
+}
+
+.bu-badge.green {
+  background:rgba(63,185,80,.15);
+  color:var(--ok);
+}
+
+.bu-badge.blue {
+  background:rgba(88,166,255,.15);
+  color:var(--info);
+}
+
+.bu-next {
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.bu-mini {
+  display:flex;
+  gap:4px;
+  align-items:center;
+  height:44px;
+  position:relative;
+  max-width:360px;
+}
+
+.bu-mini::before {
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  height:1px;
+  background:var(--line);
+}
+
+.bu-mb {
+  flex:1;
+  height:100%;
+  position:relative;
+}
+
+.bu-mb i {
+  display:block;
+  width:100%;
+  border-radius:2px;
+  max-height:50%;
+}
+
+.bu-mb i.pos {
+  background:var(--ok);
+  transform:translateY(50%);
+}
+
+.bu-mb i.neg {
+  background:var(--bad);
+  transform:translateY(50%);
+}
+
+.bu-mini-lbl {
+  font-size:10px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.bu-pips {
+  display:flex;
+  gap:3px;
+  max-width:420px;
+  margin-top:6px;
+}
+
+.bu-pips.big .bu-pip {
+  height:16px;
+}
+
+.bu-pip {
+  flex:1;
+  height:8px;
+  border-radius:3px;
+  background:#21262d;
+}
+
+.bu-pip.on {
+  background:var(--warn);
+}
+
+.bu-pip.green.on {
+  background:var(--ok);
+}
+
+.bu-pip.red.on {
+  background:var(--bad);
+}
+
+.bu-pip.amber.on {
+  background:var(--warn);
+}
+
+details.more summary {
+  cursor:pointer;
+  color:var(--info);
+  font-size:13px;
+  margin-bottom:8px;
+}
 </style>
 </head>
+
 <body>
+
 <header>
-  <h1>STX Position Framework <small>Rev. 10 · trigger dashboard</small></h1>
+  <h1>
+    STX Position Framework
+    <small>Rev. 10 · trigger dashboard</small>
+  </h1>
+
   <div class="toolbar">
     <span class="status" id="status">Starting…</span>
-    <button id="btnReload" title="Reload data/stx.json from the repo">↻ Reload repo data</button>
-    <button id="btnLive" title="Fetch directly in the browser (needs free Twelve Data key)">⚡ Live fetch</button>
-    <label class="btn">⬆ CSV<input type="file" id="csv" accept=".csv" hidden></label>
+
+    <button id="btnReload">↻ Reload repo data</button>
+    <button id="btnLive">⚡ Live fetch</button>
+
+    <label class="btn">
+      ⬆ CSV
+      <input type="file" id="csv" accept=".csv" hidden>
+    </label>
   </div>
 </header>
+
 <nav>
   <button class="tab active" data-panel="p-dash">🚦 Dashboard</button>
   <button class="tab" data-panel="p-charts">📈 Charts</button>
@@ -120,185 +1064,591 @@
   <button class="tab" data-panel="p-log">Signal log</button>
   <button class="tab" data-panel="p-set">⚙️ Settings</button>
 </nav>
+
 <main>
-  <!-- DASHBOARD -->
-  <section class="panel active" id="p-dash">
-    <div class="modebar">
-      <label class="f">Position source
+
+<!-- DASHBOARD -->
+
+<section class="panel active" id="p-dash">
+
+  <div class="modebar">
+    <label class="f">
+      Position source
+
+      <select data-cfg="posMode">
+        <option value="rules">
+          🤖 Rules simulation
+        </option>
+
+        <option value="ledger">
+          📒 My trade ledger
+        </option>
+      </select>
+    </label>
+
+    <span class="note">
+      Signals always use prices. Position source controls held percentage,
+      caps, floors and re-entry size.
+    </span>
+  </div>
+
+  <div id="verdict"></div>
+
+  <div class="board" id="board"></div>
+
+  <!-- New T1, T2 and multi-day signal progress area -->
+  <div class="buildup" id="buildup"></div>
+
+  <div class="cards" id="cards"></div>
+
+  <div id="banner"></div>
+
+  <details class="more">
+    <summary>📋 Show full rule detail and price levels</summary>
+
+    <div class="grid2">
+      <div class="box">
+        <h2>Trigger status - latest close</h2>
+        <table id="trig"></table>
+      </div>
+
+      <div class="box">
+        <h2>Price levels to watch</h2>
+        <table id="levels"></table>
+
+        <p class="note">
+          Decisions are made on the close and executed during the next
+          session.
+        </p>
+      </div>
+    </div>
+  </details>
+
+  <p class="note">
+    Data:
+    <span id="src">—</span>
+  </p>
+
+</section>
+
+<!-- CHARTS -->
+
+<section class="panel" id="p-charts">
+
+  <div class="toolbar" style="margin-bottom:12px">
+    <button data-range="3M">3M</button>
+    <button data-range="6M">6M</button>
+    <button data-range="1Y">1Y</button>
+    <button data-range="2Y">2Y</button>
+    <button data-range="5Y">5Y</button>
+    <button data-range="START">Since start</button>
+    <button data-range="ALL">All</button>
+
+    <label class="note">
+      <input type="checkbox" id="logScale">
+      log price scale
+    </label>
+  </div>
+
+  <div class="box">
+    <h2>Price, SMAs, magnitude tiers and signals</h2>
+
+    <div class="chart tall">
+      <canvas id="cPrice"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2">
+
+    <div class="box">
+      <h2>RSI(14)</h2>
+
+      <div class="chart">
+        <canvas id="cRsi"></canvas>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2>Held percentage of S0</h2>
+
+      <div class="chart">
+        <canvas id="cHeld"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="grid2">
+
+    <div class="box">
+      <h2>Drawdown from P2</h2>
+
+      <div class="chart">
+        <canvas id="cDd"></canvas>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2>Volume versus prior-50 average</h2>
+
+      <div class="chart">
+        <canvas id="cVol"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="box">
+    <h2>Weekly MACD</h2>
+
+    <div class="chart">
+      <canvas id="cMacd"></canvas>
+    </div>
+  </div>
+
+</section>
+
+<!-- TRADE LEDGER -->
+
+<section class="panel" id="p-ledger">
+
+  <div class="box" id="lgForm">
+
+    <h2>📒 Trade ledger</h2>
+
+    <div class="form">
+
+      <label class="f">
+        Trade date
+        <input type="date" id="lgDate">
+      </label>
+
+      <label class="f">
+        Action
+
+        <select id="lgSide">
+          <option value="sell">🔻 Sell</option>
+          <option value="buy">🔺 Buy</option>
+        </select>
+      </label>
+
+      <label class="f">
+        Shares
+        <input type="number" id="lgShares" min="0" step="any">
+      </label>
+
+      <label class="f">
+        Price per share
+        <input type="number" id="lgPrice" step="any">
+      </label>
+
+      <label class="f">
+        System
+        <select id="lgSys"></select>
+      </label>
+
+      <label class="f">
+        Note
+        <input type="text" id="lgNote">
+      </label>
+
+    </div>
+
+    <div class="toolbar">
+      <button class="primary" id="lgAdd">➕ Add trade</button>
+      <button id="lgExport">⬇ Export CSV</button>
+
+      <label class="btn">
+        ⬆ Import CSV
+        <input type="file" id="lgImport" accept=".csv" hidden>
+      </label>
+
+      <button id="lgClear">🗑 Clear all</button>
+
+      <label class="f">
+        Dashboard position source
+
         <select data-cfg="posMode">
-          <option value="rules">🤖 Rules simulation (assume every signal was acted on)</option>
-          <option value="ledger">📒 My trade ledger (actual trades)</option>
-        </select></label>
-      <span class="note">Signals are always computed from prices. The position source decides the held %, caps, floors and re-entry size.</span>
+          <option value="rules">🤖 Rules simulation</option>
+          <option value="ledger">📒 My trade ledger</option>
+        </select>
+      </label>
+
+      <span class="status" id="lgMsg"></span>
     </div>
-    <div id="verdict"></div>
-    <div class="board" id="board"></div>
-    <div class="cards" id="cards"></div>
-    <div id="banner"></div>
-    <details class="more">
-      <summary>📋 Show full rule detail &amp; price levels</summary>
-      <div class="grid2">
-        <div class="box"><h2>Trigger status — latest close</h2><table id="trig"></table></div>
-        <div class="box"><h2>Price levels to watch</h2><table id="levels"></table>
-          <p class="note">Decisions are made on the close and executed next session: marketable limit at prior close − 3%, MOC if unfilled by 10:30 ET. No resting stop orders.</p></div>
+
+    <p class="note">
+      Tag each trade with the system used. S2 sales count towards the
+      episode cap, while S2 and S3 sales count towards the rolling
+      10-session cap.
+    </p>
+
+  </div>
+
+  <div class="cards" id="lgCards"></div>
+
+  <div class="box">
+    <h2>Your trades</h2>
+    <table id="lgTable"></table>
+  </div>
+
+  <div class="box">
+    <h2>✅ Signal compliance</h2>
+
+    <div id="lgCompSum"></div>
+
+    <p class="note">
+      A trade is matched when the side and system agree and the trade is
+      within three sessions of the signal.
+    </p>
+
+    <table id="lgComp"></table>
+  </div>
+
+</section>
+
+<!-- NET WORTH -->
+
+<section class="panel" id="p-nw">
+
+  <div class="modebar">
+
+    <label class="f">
+      Cash yield on sale proceeds (% p.a.)
+      <input type="number" step="0.1" data-cfg="cashRate">
+    </label>
+
+    <span class="note">
+      Compares religious rule-following, your actual ledger and buy-and-hold.
+    </span>
+
+  </div>
+
+  <div class="cards" id="nwCards"></div>
+
+  <div class="box">
+    <h2>Net worth of the STX position</h2>
+
+    <div class="chart tall">
+      <canvas id="cNw"></canvas>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>Gap over time</h2>
+
+    <div class="chart">
+      <canvas id="cNwDiff"></canvas>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>Breakdown today</h2>
+    <table id="nwTable"></table>
+  </div>
+
+</section>
+
+<!-- SYSTEM 0 -->
+
+<section class="panel" id="p-s0">
+
+  <div class="box">
+
+    <h2>System 0 - Concentration Policy</h2>
+
+    <div class="form">
+
+      <label class="f">
+        Shares held now
+        <input type="number" data-cfg="sharesHeld">
+      </label>
+
+      <label class="f">
+        Unvested RSU/PSU shares
+        <input type="number" data-cfg="unvested">
+      </label>
+
+      <label class="f">
+        Investable net worth
+        <input type="number" data-cfg="netWorth">
+      </label>
+
+      <label class="f">
+        Target percentage
+        <input type="number" step="0.5" data-cfg="targetPct">
+      </label>
+
+      <label class="f">
+        Glide quarters remaining
+        <input type="number" data-cfg="quartersLeft">
+      </label>
+
+      <label class="f">
+        Shares sold by S1-S3 this quarter
+        <input type="number" data-cfg="soldThisQtr">
+      </label>
+
+    </div>
+
+    <div id="s0out"></div>
+
+  </div>
+
+</section>
+
+<!-- SYSTEM 3 -->
+
+<section class="panel" id="p-s3">
+
+  <div class="box">
+
+    <h2>System 3 - Earnings Discipline</h2>
+
+    <div class="form">
+
+      <label class="f">
+        Revenue reported
+        <input type="number" step="any" data-cfg="revAct">
+      </label>
+
+      <label class="f">
+        Revenue consensus
+        <input type="number" step="any" data-cfg="revCons">
+      </label>
+
+      <label class="f">
+        Non-GAAP EPS reported
+        <input type="number" step="any" data-cfg="epsAct">
+      </label>
+
+      <label class="f">
+        Non-GAAP EPS consensus
+        <input type="number" step="any" data-cfg="epsCons">
+      </label>
+
+      <label class="f">
+        Next-quarter revenue guidance midpoint
+        <input type="number" step="any" data-cfg="guideMid">
+      </label>
+
+      <label class="f">
+        Next-quarter revenue consensus
+        <input type="number" step="any" data-cfg="guideCons">
+      </label>
+
+    </div>
+
+    <div id="s3out"></div>
+
+  </div>
+
+</section>
+
+<!-- SYSTEM 4 -->
+
+<section class="panel" id="p-s4">
+
+  <div class="box">
+
+    <h2>
+      System 4 - Full Exit Protocol
+      <span class="badge warn">public information only</span>
+    </h2>
+
+    <div id="s4out"></div>
+
+    <div class="grid3">
+
+      <div>
+        <h3>Category 1 - Thesis invalidation</h3>
+
+        <label class="f">
+          SSD-to-HDD cost gap
+          <input type="number" step="0.1" data-cfg="ssdGap">
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-s4="c1_hyper">
+          Loss of a top-three hyperscaler relationship
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-s4="c1_hamr">
+          HAMR unscalable or mass reliability failure
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-s4="c1_tech">
+          New storage technology in commercial deployment
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-s4="c1_comp">
+          Competitor eliminates the capacity or cost lead
+        </label>
       </div>
-    </details>
-    <p class="note">Data: <span id="src">—</span></p>
-  </section>
 
-  <!-- CHARTS -->
-  <section class="panel" id="p-charts">
-    <div class="toolbar" style="margin-bottom:12px">
-      <button data-range="3M">3M</button><button data-range="6M">6M</button><button data-range="1Y">1Y</button>
-      <button data-range="2Y">2Y</button><button data-range="5Y">5Y</button><button data-range="START">Since start</button><button data-range="ALL">All</button>
-      <label class="note"><input type="checkbox" id="logScale"> log price scale</label>
-    </div>
-    <div class="box"><h2>Price, SMAs, Magnitude tiers, ladder rung &amp; signals</h2>
-      <p class="legend-hint">▼ red = System 2 sell · ▼ green = System 1 ladder sell · ▲ blue = re-entry · ★ = mandatory System 4 review · ● = info. Hover a marker for details; click legend items to toggle.</p>
-      <div class="chart tall"><canvas id="cPrice"></canvas></div></div>
-    <div class="grid2">
-      <div class="box"><h2>RSI(14)</h2><div class="chart"><canvas id="cRsi"></canvas></div></div>
-      <div class="box"><h2>Held % of S0 — rules vs actual</h2><div class="chart"><canvas id="cHeld"></canvas></div></div>
-    </div>
-    <div class="grid2">
-      <div class="box"><h2>Drawdown from P2</h2><div class="chart"><canvas id="cDd"></canvas></div></div>
-      <div class="box"><h2>Volume vs prior-50 average</h2><div class="chart"><canvas id="cVol"></canvas></div></div>
-    </div>
-    <div class="box"><h2>Weekly MACD (12/26/9) — Momentum family</h2><p class="legend-hint">* = week not yet closed (not confirmed).</p><div class="chart"><canvas id="cMacd"></canvas></div></div>
-  </section>
+      <div>
+        <h3>Category 2 - Company distress</h3>
 
-  <!-- TRADE LEDGER -->
-  <section class="panel" id="p-ledger">
-    <div class="box" id="lgForm"><h2>📒 Trade ledger — your actual STX trades since the start date</h2>
-      <div class="form">
-        <label class="f">Trade date<input type="date" id="lgDate"></label>
-        <label class="f">Action<select id="lgSide"><option value="sell">🔻 Sell</option><option value="buy">🔺 Buy</option></select></label>
-        <label class="f">Shares<input type="number" id="lgShares" min="0" step="any"></label>
-        <label class="f">Price per share (blank = that day's close)<input type="number" id="lgPrice" step="any"></label>
-        <label class="f">Done for which system<select id="lgSys"></select></label>
-        <label class="f">Note (optional)<input type="text" id="lgNote"></label>
+        <label class="check">
+          <input type="checkbox" data-s4="c2_ceo">
+          CEO/CFO adverse departure
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-s4="c2_sec">
+          SEC investigation or material restatement
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-s4="c2_debt">
+          Covenant breach or downgrade
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-s4="c2_recall">
+          Mass recall or systematic failure
+        </label>
       </div>
-      <div class="toolbar">
-        <button class="primary" id="lgAdd">➕ Add trade</button>
-        <button id="lgExport">⬇ Export CSV backup</button>
-        <label class="btn">⬆ Import CSV<input type="file" id="lgImport" accept=".csv" hidden></label>
-        <button id="lgClear">🗑 Clear all</button>
-        <label class="f" style="flex-direction:row;align-items:center;gap:8px">Dashboard position source
-          <select data-cfg="posMode"><option value="rules">🤖 Rules simulation</option><option value="ledger">📒 My trade ledger</option></select></label>
-        <span class="status" id="lgMsg"></span>
+
+      <div>
+        <h3>Category 3 - Fundamental deterioration</h3>
+
+        <label class="check">
+          <input type="checkbox" data-c3="rev">
+          Revenue declining for two consecutive quarters
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-c3="gm">
+          Gross margin more than eight points below peak
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-c3="share">
+          Nearline share below 40%
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-c3="capex">
+          Hyperscaler capex declining for two quarters
+        </label>
+
+        <label class="check">
+          <input type="checkbox" data-cfg="cat3Prev">
+          Previous report was also in breach
+        </label>
       </div>
-      <p class="note">Tag each trade with the system it was for: S2 sales count towards the 35% episode cap; S2 + S3 sales count towards the rolling 10-session cap. Trades are stored only in this browser — export a CSV backup regularly.</p>
+
     </div>
-    <div class="cards" id="lgCards"></div>
-    <div class="box"><h2>Your trades</h2><table id="lgTable"></table></div>
-    <div class="box"><h2>✅ Signal compliance — did you act on each signal?</h2>
-      <div id="lgCompSum"></div>
-      <p class="note">A trade counts if it has the same side and system tag (or "Other") and is dated within 3 sessions of the signal close. Signals are sized against your actual position. Press ✍️ Log it to pre-fill the form.</p>
-      <table id="lgComp"></table></div>
-  </section>
 
-  <!-- NET WORTH -->
-  <section class="panel" id="p-nw">
-    <div class="modebar">
-      <label class="f">Cash yield on sale proceeds (% p.a.)<input type="number" step="0.1" data-cfg="cashRate"></label>
-      <span class="note">Compares the value of your S0 shares since the start date (shares × close + cash from sales). 🤖 Rules = every signal filled at the next open. 📒 Actual = your ledger trades at your price. 💤 Buy &amp; hold = never sold. Before tax and fees.</span>
+  </div>
+
+</section>
+
+<!-- SIGNAL LOG -->
+
+<section class="panel" id="p-log">
+
+  <div class="box">
+    <h2>Signal log</h2>
+
+    <p class="note" id="logsum"></p>
+
+    <table id="log"></table>
+  </div>
+
+</section>
+
+<!-- SETTINGS -->
+
+<section class="panel" id="p-set">
+
+  <div class="box">
+
+    <h2>Framework settings</h2>
+
+    <div class="form">
+
+      <label class="f">
+        Framework start date
+        <input type="date" data-cfg="startDate">
+      </label>
+
+      <label class="f">
+        S0 shares
+        <input type="number" data-cfg="s0">
+      </label>
+
+      <label class="f">
+        A1 override
+        <input type="number" step="any" data-cfg="a1Override">
+      </label>
+
+      <label class="f">
+        Forward NTM EPS consensus
+        <input type="number" step="any" data-cfg="fwdEps">
+      </label>
+
+      <label class="f">
+        Accelerator P/E
+        <input type="number" data-cfg="peCompress">
+      </label>
+
+      <label class="f">
+        Valuation sell P/E
+        <input type="number" data-cfg="peSell">
+      </label>
+
+      <label class="f">
+        Next earnings date
+        <input type="date" data-cfg="earningsDate">
+      </label>
+
+      <label class="f">
+        Data file path
+        <input type="text" data-cfg="dataUrl">
+      </label>
+
+      <label class="f">
+        Twelve Data API key
+        <input type="password" data-cfg="twelveKey">
+      </label>
+
     </div>
-    <div class="cards" id="nwCards"></div>
-    <div class="box"><h2>Net worth of the STX position</h2><div class="chart tall"><canvas id="cNw"></canvas></div></div>
-    <div class="box"><h2>Gap over time (green = actual ahead of rules, red = behind)</h2><div class="chart"><canvas id="cNwDiff"></canvas></div></div>
-    <div class="box"><h2>Breakdown today</h2><table id="nwTable"></table></div>
-  </section>
 
-  <!-- SYSTEM 0 -->
-  <section class="panel" id="p-s0">
-    <div class="box"><h2>System 0 — Concentration Policy</h2>
-      <div class="form">
-        <label class="f">Shares held now<input type="number" data-cfg="sharesHeld"></label>
-        <label class="f">Unvested RSU/PSU shares<input type="number" data-cfg="unvested"></label>
-        <label class="f">Investable net worth (USD)<input type="number" data-cfg="netWorth"></label>
-        <label class="f">Target % of net worth<input type="number" step="0.5" data-cfg="targetPct"></label>
-        <label class="f">Glide quarters remaining<input type="number" data-cfg="quartersLeft"></label>
-        <label class="f">Shares sold by S1–3 this quarter (ignored when the ledger has trades)<input type="number" data-cfg="soldThisQtr"></label>
-      </div>
-      <div id="s0out"></div>
-    </div>
-  </section>
+    <label class="check">
+      <input type="checkbox" data-cfg="fundamentalsOk">
+      Re-entry fundamental check is OK
+    </label>
 
-  <!-- SYSTEM 3 -->
-  <section class="panel" id="p-s3">
-    <div class="box"><h2>System 3 — Earnings Discipline</h2>
-      <div class="form">
-        <label class="f">Revenue reported<input type="number" step="any" data-cfg="revAct"></label>
-        <label class="f">Revenue consensus<input type="number" step="any" data-cfg="revCons"></label>
-        <label class="f">Non-GAAP EPS reported<input type="number" step="any" data-cfg="epsAct"></label>
-        <label class="f">Non-GAAP EPS consensus<input type="number" step="any" data-cfg="epsCons"></label>
-        <label class="f">Next-qtr revenue guidance midpoint<input type="number" step="any" data-cfg="guideMid"></label>
-        <label class="f">Next-qtr revenue consensus<input type="number" step="any" data-cfg="guideCons"></label>
-      </div>
-      <div id="s3out"></div>
-      <p class="note">Beat = revenue and EPS both above consensus · Miss = either more than 2% below · Guidance raised/cut = midpoint more than ±2% vs consensus. Use the pre-report consensus mean.</p>
-    </div>
-  </section>
+    <p>
+      <button id="btnReset">Reset all settings</button>
+    </p>
 
-  <!-- SYSTEM 4 -->
-  <section class="panel" id="p-s4">
-    <div class="box"><h2>System 4 — Full Exit Protocol <span class="badge warn">public information only</span></h2>
-      <div id="s4out" style="margin-bottom:10px"></div>
-      <div class="grid3">
-        <div><h3>Category 1 — Thesis invalidation</h3>
-          <label class="f">SSD-to-HDD cost gap (per TB, ×)<input type="number" step="0.1" data-cfg="ssdGap"></label>
-          <label class="check"><input type="checkbox" data-s4="c1_hyper">Loss of a top-3 hyperscaler relationship (public)</label>
-          <label class="check"><input type="checkbox" data-s4="c1_hamr">HAMR unscalable / mass reliability failure</label>
-          <label class="check"><input type="checkbox" data-s4="c1_tech">New storage technology in commercial deployment</label>
-          <label class="check"><input type="checkbox" data-s4="c1_comp">Competitor eliminates HAMR capacity/cost lead</label>
-        </div>
-        <div><h3>Category 2 — Company distress</h3>
-          <label class="check"><input type="checkbox" data-s4="c2_ceo">CEO/CFO adverse departure</label>
-          <label class="check"><input type="checkbox" data-s4="c2_sec">SEC investigation / material restatement</label>
-          <label class="check"><input type="checkbox" data-s4="c2_debt">Covenant breach / sub-investment-grade downgrade</label>
-          <label class="check"><input type="checkbox" data-s4="c2_recall">Mass recall / systematic failure rate</label>
-        </div>
-        <div><h3>Category 3 — Fundamental deterioration (this report)</h3>
-          <label class="check"><input type="checkbox" data-c3="rev">Revenue: 2 consecutive qtrs YoY decline</label>
-          <label class="check"><input type="checkbox" data-c3="gm">Gross margin: &gt; 8 pts below peak, 2 qtrs</label>
-          <label class="check"><input type="checkbox" data-c3="share">Nearline share &lt; 40%, 2 qtrs</label>
-          <label class="check"><input type="checkbox" data-c3="capex">Hyperscaler capex declining, 2 qtrs</label>
-          <label class="check"><input type="checkbox" data-cfg="cat3Prev"><b>Previous report was also in breach</b></label>
-        </div>
-      </div>
-    </div>
-  </section>
+    <p class="note">
+      Settings, personal values and the trade ledger are stored only in
+      this browser.
+    </p>
 
-  <!-- LOG -->
-  <section class="panel" id="p-log">
-    <div class="box"><h2>Signal log — Systems 1, 2, re-entry &amp; mandatory review</h2>
-      <p class="note" id="logsum"></p><table id="log"></table></div>
-  </section>
+  </div>
 
-  <!-- SETTINGS -->
-  <section class="panel" id="p-set">
-    <div class="box"><h2>Framework settings</h2>
-      <div class="form">
-        <label class="f">Framework start date<input type="date" data-cfg="startDate"></label>
-        <label class="f">S0 shares (your holding on the start date)<input type="number" data-cfg="s0"></label>
-        <label class="f">A1 override (blank = auto 252-day high)<input type="number" step="any" data-cfg="a1Override"></label>
-        <label class="f">Forward (NTM) EPS consensus<input type="number" step="any" data-cfg="fwdEps"></label>
-        <label class="f">Accelerator P/E (compress)<input type="number" data-cfg="peCompress"></label>
-        <label class="f">Valuation sell P/E<input type="number" data-cfg="peSell"></label>
-        <label class="f">Next earnings date<input type="date" data-cfg="earningsDate"></label>
-        <label class="f">Data file path<input type="text" data-cfg="dataUrl"></label>
-        <label class="f">Twelve Data API key (optional, live fetch)<input type="password" data-cfg="twelveKey"></label>
-      </div>
-      <label class="check"><input type="checkbox" data-cfg="fundamentalsOk">Re-entry fundamental check OK (no hyperscaler capex / HAMR deterioration in 90 days; open window; no S3 lockout / S4 trigger)</label>
-      <p><button id="btnReset">Reset all settings</button></p>
-      <p class="note">Settings, personal numbers and the trade ledger are stored only in this browser (localStorage). Forward EPS is a single value applied across the simulated period — refresh it after every earnings release.</p>
-    </div>
-  </section>
+</section>
 
-  <p class="disclaimer">For analysis and discussion only — not financial, tax or legal advice. Uses public market data only; no trigger may rely on information known through employment. Confirm trading windows, pre-clearance and 10b5-1 arrangements with Seagate Legal / Compliance before acting.</p>
+<p class="disclaimer">
+  For analysis and discussion only. This is not financial, tax or legal
+  advice. Confirm trading windows, pre-clearance and compliance
+  requirements before acting.
+</p>
+
 </main>
+
 <script src="app.js"></script>
 <script src="visual.js"></script>
 <script src="ledger.js"></script>
+<script src="buildup.js"></script>
+
 </body>
 </html>
