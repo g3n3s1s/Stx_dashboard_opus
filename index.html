@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>STX Framework Rev. 10 — Trigger Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js">\</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--line:#30363d;--text:#e6edf3;--muted:#8b949e;
         --ok:#3fb950;--warn:#d29922;--bad:#f85149;--info:#58a6ff;--accent:#2ea043}
@@ -136,7 +136,7 @@
     <div class="cards" id="cards"></div>
     <div id="banner"></div>
     <details class="more">
-      <summary>📋 Show full rule detail & price levels</summary>
+      <summary>📋 Show full rule detail &amp; price levels</summary>
       <div class="grid2">
         <div class="box"><h2>Trigger status — latest close</h2><table id="trig"></table></div>
         <div class="box"><h2>Price levels to watch</h2><table id="levels"></table>
@@ -153,7 +153,7 @@
       <button data-range="2Y">2Y</button><button data-range="5Y">5Y</button><button data-range="START">Since start</button><button data-range="ALL">All</button>
       <label class="note"><input type="checkbox" id="logScale"> log price scale</label>
     </div>
-    <div class="box"><h2>Price, SMAs, Magnitude tiers, ladder rung & signals</h2>
+    <div class="box"><h2>Price, SMAs, Magnitude tiers, ladder rung &amp; signals</h2>
       <p class="legend-hint">▼ red = System 2 sell · ▼ green = System 1 ladder sell · ▲ blue = re-entry · ★ = mandatory System 4 review · ● = info. Hover a marker for details; click legend items to toggle.</p>
       <div class="chart tall"><canvas id="cPrice"></canvas></div></div>
     <div class="grid2">
@@ -201,7 +201,7 @@
   <section class="panel" id="p-nw">
     <div class="modebar">
       <label class="f">Cash yield on sale proceeds (% p.a.)<input type="number" step="0.1" data-cfg="cashRate"></label>
-      <span class="note">Compares the value of your S0 shares since the start date (shares × close + cash from sales). 🤖 Rules = every signal filled at the next open. 📒 Actual = your ledger trades at your price. 💤 Buy & hold = never sold. Before tax and fees.</span>
+      <span class="note">Compares the value of your S0 shares since the start date (shares × close + cash from sales). 🤖 Rules = every signal filled at the next open. 📒 Actual = your ledger trades at your price. 💤 Buy &amp; hold = never sold. Before tax and fees.</span>
     </div>
     <div class="cards" id="nwCards"></div>
     <div class="box"><h2>Net worth of the STX position</h2><div class="chart tall"><canvas id="cNw"></canvas></div></div>
@@ -260,8 +260,8 @@
         </div>
         <div><h3>Category 3 — Fundamental deterioration (this report)</h3>
           <label class="check"><input type="checkbox" data-c3="rev">Revenue: 2 consecutive qtrs YoY decline</label>
-          <label class="check"><input type="checkbox" data-c3="gm">Gross margin: > 8 pts below peak, 2 qtrs</label>
-          <label class="check"><input type="checkbox" data-c3="share">Nearline share < 40%, 2 qtrs</label>
+          <label class="check"><input type="checkbox" data-c3="gm">Gross margin: &gt; 8 pts below peak, 2 qtrs</label>
+          <label class="check"><input type="checkbox" data-c3="share">Nearline share &lt; 40%, 2 qtrs</label>
           <label class="check"><input type="checkbox" data-c3="capex">Hyperscaler capex declining, 2 qtrs</label>
           <label class="check"><input type="checkbox" data-cfg="cat3Prev"><b>Previous report was also in breach</b></label>
         </div>
@@ -271,7 +271,7 @@
 
   <!-- LOG -->
   <section class="panel" id="p-log">
-    <div class="box"><h2>Signal log — Systems 1, 2, re-entry & mandatory review</h2>
+    <div class="box"><h2>Signal log — Systems 1, 2, re-entry &amp; mandatory review</h2>
       <p class="note" id="logsum"></p><table id="log"></table></div>
   </section>
 
