@@ -223,8 +223,10 @@
     ];
     el('btRisk').innerHTML = '<thead><tr><th>Measure (' + Hm + '-month windows)</th><th>💤 Buy & hold</th><th>🪜 Current ladder</th><th>🎯 Arm-then-sell</th></tr></thead><tbody>' +
       lines.map(function (L) {
-        var b = S.hold[L[1]];
-        return '<tr><td>' + Lb) + '</td>' + cell(S.current[L[1]], b, L[2], L[3]) + cell(S.arm[L[1]], b, L[2], L[3]) + '</tr>';
+        var name = L[0], key = L[1], up = L[2], fmt = L[3];
+        var b = S.hold[key];
+        var holdTxt = b == null ? '—' : fmt(b);
+        return '<tr><td>' + name + '</td><td>' + holdTxt + '</td>' + cell(S.current[key], b, up, fmt) + cell(S.arm[key], b, up, fmt) + '</tr>';
       }).join('') + '</tbody>';
 
     // plain-language verdict
