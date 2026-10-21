@@ -17,9 +17,10 @@
   .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   button,.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;font:inherit}
   button:hover,.btn:hover{border-color:var(--info)} button.active{background:#1f6feb;border-color:#1f6feb}
+  button.primary{background:#238636;border-color:#2ea043} button.mini{padding:2px 8px;font-size:12px}
   .status{font-size:12px;color:var(--muted)} .status.ok{color:var(--ok)} .status.err{color:var(--bad)}
   nav{display:flex;gap:4px;padding:0 22px;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto}
-  .tab{background:none;border:none;border-bottom:2px solid transparent;border-radius:0;padding:10px 14px;color:var(--muted)}
+  .tab{background:none;border:none;border-bottom:2px solid transparent;border-radius:0;padding:10px 14px;color:var(--muted);white-space:nowrap}
   .tab.active{color:var(--text);border-bottom-color:#f0883e;background:none}
   main{padding:18px 22px;max-width:1500px;margin:auto}
   .panel{display:none} .panel.active{display:block}
@@ -33,14 +34,16 @@
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
   th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px;position:sticky;top:0}
-  tr:hover td{background:rgba(255,255,255,.02)} tr.cur td{background:rgba(31,111,235,.18);font-weight:600}
+  tr:hover td{background:rgba(255,255,255,.02)} tr.cur td{background:rgba(31,111,235,.18);font-weight:600} tr.dim td{opacity:.5}
   .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid}
   .badge.ok{color:var(--ok);border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.1)}
   .badge.warn{color:var(--warn);border-color:rgba(210,153,34,.4);background:rgba(210,153,34,.1)}
   .badge.bad{color:#fff;border-color:var(--bad);background:var(--bad)}
   .badge.info{color:var(--info);border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.1)}
   .badge.muted{color:var(--muted);border-color:var(--line)}
-  .sys{white-space:nowrap;font-weight:600} .s-S1{color:#3fb950} .s-S2{color:#f0883e} .s-S4{color:#d2a8ff} .s-RE{color:#58a6ff}
+  .pill{display:inline-block;margin:0 6px 6px 0;padding:4px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12px}
+  .pill.ok{color:var(--ok)} .pill.warn{color:var(--warn)} .pill.bad{color:var(--bad)} .pill.info{color:var(--info)} .pill.muted{color:var(--muted)}
+  .sys{white-space:nowrap;font-weight:600} .s-S1{color:#3fb950} .s-S2{color:#f0883e} .s-S3{color:#e3b341} .s-S4{color:#d2a8ff} .s-RE{color:#58a6ff} .s-S0{color:#79c0ff} .s-Other{color:var(--muted)}
   .up{color:var(--ok)} .down{color:var(--bad)} .muted{color:var(--muted)}
   .alert{border-radius:8px;padding:10px 12px;margin-bottom:8px;border:1px solid}
   .alert.ok{border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.08)}
@@ -49,7 +52,7 @@
   .alert.info{border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.08)}
   .chart{position:relative;height:300px} .chart.tall{height:440px}
   label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
-  input[type=number],input[type=text],input[type=date],input[type=password]{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+  input[type=number],input[type=text],input[type=date],input[type=password],select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
   .form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px}
   .kv td:first-child{color:var(--muted);width:55%}
   .matrix td,.matrix th{text-align:center} .matrix td.hit{background:#1f6feb;color:#fff;font-weight:700}
@@ -58,6 +61,7 @@
   .note{font-size:12px;color:var(--muted)}
   .disclaimer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:20px;padding-top:10px}
   .legend-hint{font-size:12px;color:var(--muted);margin:-4px 0 8px}
+  .modebar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:10px 14px;margin-bottom:14px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
 
   /* ---- visual signal board ---- */
   .verdict{display:flex;gap:14px;align-items:center;border-radius:12px;padding:14px 18px;margin-bottom:14px;border:1px solid}
@@ -106,17 +110,27 @@
   </div>
 </header>
 <nav>
-  <button class="tab active" data-panel="p-dash">Dashboard</button>
-  <button class="tab" data-panel="p-charts">Charts</button>
-  <button class="tab" data-panel="p-s0">System 0 · Concentration</button>
-  <button class="tab" data-panel="p-s3">System 3 · Earnings</button>
-  <button class="tab" data-panel="p-s4">System 4 · Full Exit</button>
+  <button class="tab active" data-panel="p-dash">🚦 Dashboard</button>
+  <button class="tab" data-panel="p-charts">📈 Charts</button>
+  <button class="tab" data-panel="p-ledger">📒 Trade ledger</button>
+  <button class="tab" data-panel="p-nw">💰 Net worth</button>
+  <button class="tab" data-panel="p-s0">System 0</button>
+  <button class="tab" data-panel="p-s3">System 3</button>
+  <button class="tab" data-panel="p-s4">System 4</button>
   <button class="tab" data-panel="p-log">Signal log</button>
-  <button class="tab" data-panel="p-set">Settings</button>
+  <button class="tab" data-panel="p-set">⚙️ Settings</button>
 </nav>
 <main>
   <!-- DASHBOARD -->
   <section class="panel active" id="p-dash">
+    <div class="modebar">
+      <label class="f">Position source
+        <select data-cfg="posMode">
+          <option value="rules">🤖 Rules simulation (assume every signal was acted on)</option>
+          <option value="ledger">📒 My trade ledger (actual trades)</option>
+        </select></label>
+      <span class="note">Signals are always computed from prices. The position source decides the held %, caps, floors and re-entry size.</span>
+    </div>
     <div id="verdict"></div>
     <div class="board" id="board"></div>
     <div class="cards" id="cards"></div>
@@ -140,17 +154,59 @@
       <label class="note"><input type="checkbox" id="logScale"> log price scale</label>
     </div>
     <div class="box"><h2>Price, SMAs, Magnitude tiers, ladder rung & signals</h2>
-      <p class="legend-hint">▼ red = System 2 sell · ▼ green = System 1 ladder sell · ▲ blue = re-entry · ★ = mandatory System 4 review · ● = info (dormant/re-base/episode closed). Hover a marker for details; click legend items to toggle.</p>
+      <p class="legend-hint">▼ red = System 2 sell · ▼ green = System 1 ladder sell · ▲ blue = re-entry · ★ = mandatory System 4 review · ● = info. Hover a marker for details; click legend items to toggle.</p>
       <div class="chart tall"><canvas id="cPrice"></canvas></div></div>
     <div class="grid2">
       <div class="box"><h2>RSI(14)</h2><div class="chart"><canvas id="cRsi"></canvas></div></div>
-      <div class="box"><h2>Held % of S0 (per rules)</h2><div class="chart"><canvas id="cHeld"></canvas></div></div>
+      <div class="box"><h2>Held % of S0 — rules vs actual</h2><div class="chart"><canvas id="cHeld"></canvas></div></div>
     </div>
     <div class="grid2">
       <div class="box"><h2>Drawdown from P2</h2><div class="chart"><canvas id="cDd"></canvas></div></div>
       <div class="box"><h2>Volume vs prior-50 average</h2><div class="chart"><canvas id="cVol"></canvas></div></div>
     </div>
     <div class="box"><h2>Weekly MACD (12/26/9) — Momentum family</h2><p class="legend-hint">* = week not yet closed (not confirmed).</p><div class="chart"><canvas id="cMacd"></canvas></div></div>
+  </section>
+
+  <!-- TRADE LEDGER -->
+  <section class="panel" id="p-ledger">
+    <div class="box" id="lgForm"><h2>📒 Trade ledger — your actual STX trades since the start date</h2>
+      <div class="form">
+        <label class="f">Trade date<input type="date" id="lgDate"></label>
+        <label class="f">Action<select id="lgSide"><option value="sell">🔻 Sell</option><option value="buy">🔺 Buy</option></select></label>
+        <label class="f">Shares<input type="number" id="lgShares" min="0" step="any"></label>
+        <label class="f">Price per share (blank = that day's close)<input type="number" id="lgPrice" step="any"></label>
+        <label class="f">Done for which system<select id="lgSys"></select></label>
+        <label class="f">Note (optional)<input type="text" id="lgNote"></label>
+      </div>
+      <div class="toolbar">
+        <button class="primary" id="lgAdd">➕ Add trade</button>
+        <button id="lgExport">⬇ Export CSV backup</button>
+        <label class="btn">⬆ Import CSV<input type="file" id="lgImport" accept=".csv" hidden></label>
+        <button id="lgClear">🗑 Clear all</button>
+        <label class="f" style="flex-direction:row;align-items:center;gap:8px">Dashboard position source
+          <select data-cfg="posMode"><option value="rules">🤖 Rules simulation</option><option value="ledger">📒 My trade ledger</option></select></label>
+        <span class="status" id="lgMsg"></span>
+      </div>
+      <p class="note">Tag each trade with the system it was for: S2 sales count towards the 35% episode cap; S2 + S3 sales count towards the rolling 10-session cap. Trades are stored only in this browser — export a CSV backup regularly.</p>
+    </div>
+    <div class="cards" id="lgCards"></div>
+    <div class="box"><h2>Your trades</h2><table id="lgTable"></table></div>
+    <div class="box"><h2>✅ Signal compliance — did you act on each signal?</h2>
+      <div id="lgCompSum"></div>
+      <p class="note">A trade counts if it has the same side and system tag (or "Other") and is dated within 3 sessions of the signal close. Signals are sized against your actual position. Press ✍️ Log it to pre-fill the form.</p>
+      <table id="lgComp"></table></div>
+  </section>
+
+  <!-- NET WORTH -->
+  <section class="panel" id="p-nw">
+    <div class="modebar">
+      <label class="f">Cash yield on sale proceeds (% p.a.)<input type="number" step="0.1" data-cfg="cashRate"></label>
+      <span class="note">Compares the value of your S0 shares since the start date (shares × close + cash from sales). 🤖 Rules = every signal filled at the next open. 📒 Actual = your ledger trades at your price. 💤 Buy & hold = never sold. Before tax and fees.</span>
+    </div>
+    <div class="cards" id="nwCards"></div>
+    <div class="box"><h2>Net worth of the STX position</h2><div class="chart tall"><canvas id="cNw"></canvas></div></div>
+    <div class="box"><h2>Gap over time (green = actual ahead of rules, red = behind)</h2><div class="chart"><canvas id="cNwDiff"></canvas></div></div>
+    <div class="box"><h2>Breakdown today</h2><table id="nwTable"></table></div>
   </section>
 
   <!-- SYSTEM 0 -->
@@ -162,7 +218,7 @@
         <label class="f">Investable net worth (USD)<input type="number" data-cfg="netWorth"></label>
         <label class="f">Target % of net worth<input type="number" step="0.5" data-cfg="targetPct"></label>
         <label class="f">Glide quarters remaining<input type="number" data-cfg="quartersLeft"></label>
-        <label class="f">Shares sold by S1–3 this quarter<input type="number" data-cfg="soldThisQtr"></label>
+        <label class="f">Shares sold by S1–3 this quarter (ignored when the ledger has trades)<input type="number" data-cfg="soldThisQtr"></label>
       </div>
       <div id="s0out"></div>
     </div>
@@ -190,7 +246,7 @@
       <div id="s4out" style="margin-bottom:10px"></div>
       <div class="grid3">
         <div><h3>Category 1 — Thesis invalidation</h3>
-          <label class="f">SSD-to-HDD cost gap ($/TB, ×)<input type="number" step="0.1" data-cfg="ssdGap"></label>
+          <label class="f">SSD-to-HDD cost gap (per TB, ×)<input type="number" step="0.1" data-cfg="ssdGap"></label>
           <label class="check"><input type="checkbox" data-s4="c1_hyper">Loss of a top-3 hyperscaler relationship (public)</label>
           <label class="check"><input type="checkbox" data-s4="c1_hamr">HAMR unscalable / mass reliability failure</label>
           <label class="check"><input type="checkbox" data-s4="c1_tech">New storage technology in commercial deployment</label>
@@ -215,7 +271,7 @@
 
   <!-- LOG -->
   <section class="panel" id="p-log">
-    <div class="box"><h2>Signal log — Systems 1, 2, re-entry & mandatory review (simulated from start date)</h2>
+    <div class="box"><h2>Signal log — Systems 1, 2, re-entry & mandatory review</h2>
       <p class="note" id="logsum"></p><table id="log"></table></div>
   </section>
 
@@ -224,7 +280,7 @@
     <div class="box"><h2>Framework settings</h2>
       <div class="form">
         <label class="f">Framework start date<input type="date" data-cfg="startDate"></label>
-        <label class="f">S0 shares (for share counts)<input type="number" data-cfg="s0"></label>
+        <label class="f">S0 shares (your holding on the start date)<input type="number" data-cfg="s0"></label>
         <label class="f">A1 override (blank = auto 252-day high)<input type="number" step="any" data-cfg="a1Override"></label>
         <label class="f">Forward (NTM) EPS consensus<input type="number" step="any" data-cfg="fwdEps"></label>
         <label class="f">Accelerator P/E (compress)<input type="number" data-cfg="peCompress"></label>
@@ -235,7 +291,7 @@
       </div>
       <label class="check"><input type="checkbox" data-cfg="fundamentalsOk">Re-entry fundamental check OK (no hyperscaler capex / HAMR deterioration in 90 days; open window; no S3 lockout / S4 trigger)</label>
       <p><button id="btnReset">Reset all settings</button></p>
-      <p class="note">Settings and personal numbers are stored only in this browser (localStorage). The simulation applies Systems 1 and 2 plus re-entry exactly as written from the start date, assuming every signal was acted on. Forward EPS is a single value applied across the simulated period — refresh it after every earnings release.</p>
+      <p class="note">Settings, personal numbers and the trade ledger are stored only in this browser (localStorage). Forward EPS is a single value applied across the simulated period — refresh it after every earnings release.</p>
     </div>
   </section>
 
@@ -243,5 +299,6 @@
 </main>
 <script src="app.js"></script>
 <script src="visual.js"></script>
+<script src="ledger.js"></script>
 </body>
 </html>
