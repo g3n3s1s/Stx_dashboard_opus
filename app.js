@@ -377,7 +377,7 @@ if (typeof document !== 'undefined') (() => {
   const byId = id => document.getElementById(id);
   const money = x => x == null || !isFinite(x) ? '—' : '\u0024' + (+x).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const pctf = (x, d = 1) => x == null || !isFinite(x) ? '—' : (x * 100).toFixed(d) + '%';
-  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&', '<': '<', '>': '>', '"': '"' }[ch]));
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const ledgerMode = () => cfg.posMode === 'ledger';
 
   const STATUS_CLASS = {
@@ -454,7 +454,7 @@ if (typeof document !== 'undefined') (() => {
     if (!cfg.twelveKey) { setStatus('Enter a free Twelve Data API key in Settings to fetch from the browser.', 'err'); return; }
     try {
       setStatus('Fetching live daily bars from Twelve Data …');
-      const u = ("https://api.twelvedata.com/time\_series?symbol=" + encodeURIComponent(cfg.symbol) + "&interval=1day&outputsize=2500&apikey=" + encodeURIComponent(cfg.twelveKey));
+      const u = ("https://api.twelvedata.com/time_series?symbol=" + encodeURIComponent(cfg.symbol) + "&interval=1day&outputsize=2500&apikey=" + encodeURIComponent(cfg.twelveKey));
       const j = await (await fetch(u)).json();
       if (!j.values) throw new Error(j.message || 'no values');
       const bars = j.values.map(x => ({ d: x.datetime.slice(0, 10), o: +x.open, h: +x.high, l: +x.low, c: +x.close, v: +x.volume })).reverse();
